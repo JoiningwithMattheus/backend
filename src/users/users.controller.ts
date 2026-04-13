@@ -8,9 +8,12 @@ import {
   Patch,
   Post,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { KeycloakJwtGuard } from 'src/auth/keycloak-jwt.guard';
 
+@UseGuards(KeycloakJwtGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
