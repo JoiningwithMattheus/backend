@@ -11,10 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { KeycloakJwtGuard } from 'src/auth/keycloak-jwt.guard';
+import { KeycloakJwtGuard } from '../auth/keycloak-jwt.guard';
 import { Role } from '@prisma/client';
-import { Roles } from 'src/auth/roles.decorator';
-import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 interface CreateUserBody {
   name?: string;
@@ -54,12 +54,23 @@ export class UsersController {
       throw new BadRequestException('Name and email are required');
     }
 
+    if (name.length < 2) {
+      throw new BadRequestException('Name must be at least 2 characters');
+    }
+
+    if (!this.isValidEmail(email)) {
+      throw new BadRequestException('Email must be valid');
+    }
+
     return this.usersService.create({ name, email, role });
   }
 
   @Patch(':id')
   @Roles('admin')
-  updateUser(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUserBody) {
+  updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateUserBody,
+  ) {
     const name = body?.name?.trim();
     const email = body?.email?.trim();
     const role = this.parseRole(body?.role);
@@ -76,6 +87,14 @@ export class UsersController {
       throw new BadRequestException('Email cannot be empty');
     }
 
+    if (name !== undefined && name.length < 2) {
+      throw new BadRequestException('Name must be at least 2 characters');
+    }
+
+    if (email !== undefined && !this.isValidEmail(email)) {
+      throw new BadRequestException('Email must be valid');
+    }
+
     return this.usersService.update(id, { name, email, role });
   }
 
@@ -83,6 +102,10 @@ export class UsersController {
   @Roles('admin')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
+  }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
   private parseRole(role: Role | undefined): Role | undefined {

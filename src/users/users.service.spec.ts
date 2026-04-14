@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -43,13 +44,18 @@ describe('UsersService', () => {
   });
 
   it('create delegates to prisma', () => {
-    service.create('John');
-    expect(prismaServiceMock.user.create).toHaveBeenCalledWith({ data: { name: 'John' } });
+    service.create({ name: 'John', email: 'john@example.com', role: Role.ADMIN });
+    expect(prismaServiceMock.user.create).toHaveBeenCalledWith({
+      data: { name: 'John', email: 'john@example.com', role: Role.ADMIN },
+    });
   });
 
   it('update delegates to prisma', () => {
-    service.update(5, 'Jane');
-    expect(prismaServiceMock.user.update).toHaveBeenCalledWith({ where: { id: 5 }, data: { name: 'Jane' } });
+    service.update(5, { name: 'Jane', email: 'jane@example.com', role: Role.USER });
+    expect(prismaServiceMock.user.update).toHaveBeenCalledWith({
+      where: { id: 5 },
+      data: { name: 'Jane', email: 'jane@example.com', role: Role.USER },
+    });
   });
 
   it('remove delegates to prisma', () => {
