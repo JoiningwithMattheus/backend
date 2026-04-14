@@ -1,5 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  role?: Role;
+}
+
+export interface UpdateUserInput {
+  name?: string;
+  email?: string;
+  role?: Role;
+}
 
 @Injectable()
 export class UsersService {
@@ -15,16 +28,20 @@ export class UsersService {
     });
   }
 
-  create(name: string) {
+  create(input: CreateUserInput) {
     return this.prisma.user.create({
-      data: { name },
+      data: {
+        name: input.name,
+        email: input.email,
+        role: input.role ?? Role.USER,
+      },
     });
   }
 
-  update(id: number, name: string) {
+  update(id: number, input: UpdateUserInput) {
     return this.prisma.user.update({
       where: { id },
-      data: { name },
+      data: input,
     });
   }
 

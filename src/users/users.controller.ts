@@ -12,8 +12,23 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { KeycloakJwtGuard } from 'src/auth/keycloak-jwt.guard';
+import { Role } from '@prisma/client';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
 
-@UseGuards(KeycloakJwtGuard)
+interface CreateUserBody {
+  name?: string;
+  email?: string;
+  role?: Role;
+}
+
+interface UpdateUserBody {
+  name?: string;
+  email?: string;
+  role?: Role;
+}
+
+@UseGuards(KeycloakJwtGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -29,26 +44,54 @@ export class UsersController {
   }
 
   @Post()
-  createUser(@Body() body: { name: string }) {
-    if (!body || !body.name) {
-      throw new BadRequestException('Name is required');
+  @Roles('admin')
+  createUser(@Body() body: CreateUserBody) {
+    const name = body?.name?.trim();
+    const email = body?.email?.trim();
+    const role = this.parseRole(body?.role);
+
+    if (!name || !email) {
+      throw new BadRequestException('Name and email are required');
     }
-    return this.usersService.create(body.name);
+
+    return this.usersService.create({ name, email, role });
   }
 
   @Patch(':id')
-  updateUser(@Param('id', ParseIntPipe) id: number, @Body() body: { name?: string }) {
+  @Roles('admin')
+  updateUser(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUserBody) {
     const name = body?.name?.trim();
+    const email = body?.email?.trim();
+    const role = this.parseRole(body?.role);
 
-    if (!name) {
-      throw new BadRequestException('Name is required');
+    if (!name && !email && !role) {
+      throw new BadRequestException('Name, email, or role is required');
     }
 
-    return this.usersService.update(id, name);
+    if (body?.name !== undefined && !name) {
+      throw new BadRequestException('Name cannot be empty');
+    }
+
+    if (body?.email !== undefined && !email) {
+      throw new BadRequestException('Email cannot be empty');
+    }
+
+    return this.usersService.update(id, { name, email, role });
   }
 
   @Delete(':id')
+  @Roles('admin')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
+  }
+
+  private parseRole(role: Role | undefined): Role | undefined {
+    if (role === undefined) return undefined;
+
+    if (role !== Role.ADMIN && role !== Role.USER) {
+      throw new BadRequestException('Role must be ADMIN or USER');
+    }
+
+    return role;
   }
 }
