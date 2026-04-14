@@ -15,18 +15,8 @@ import { KeycloakJwtGuard } from '../auth/keycloak-jwt.guard';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-
-interface CreateUserBody {
-  name?: string;
-  email?: string;
-  role?: Role;
-}
-
-interface UpdateUserBody {
-  name?: string;
-  email?: string;
-  role?: Role;
-}
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 @UseGuards(KeycloakJwtGuard, RolesGuard)
 @Controller('users')
@@ -45,57 +35,33 @@ export class UsersController {
 
   @Post()
   @Roles('admin')
-  createUser(@Body() body: CreateUserBody) {
-    const name = body?.name?.trim();
-    const email = body?.email?.trim();
-    const role = this.parseRole(body?.role);
-
-    if (!name || !email) {
-      throw new BadRequestException('Name and email are required');
+  createUser(@Body() body: CreateUserDto) {
+    if (
+      body.name === undefined &&
+      body.email === undefined &&
+      body.role === undefined
+    ) {
+      throw new BadRequestException('Name, email, or role is required');
     }
 
-    if (name.length < 2) {
-      throw new BadRequestException('Name must be at least 2 characters');
-    }
-
-    if (!this.isValidEmail(email)) {
-      throw new BadRequestException('Email must be valid');
-    }
-
-    return this.usersService.create({ name, email, role });
+    return this.usersService.create(body);
   }
 
   @Patch(':id')
   @Roles('admin')
   updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateUserBody,
+    @Body() body: UpdateUserDto,
   ) {
-    const name = body?.name?.trim();
-    const email = body?.email?.trim();
-    const role = this.parseRole(body?.role);
-
-    if (!name && !email && !role) {
+    if (
+      body.name === undefined &&
+      body.email === undefined &&
+      body.role === undefined
+    ) {
       throw new BadRequestException('Name, email, or role is required');
     }
 
-    if (body?.name !== undefined && !name) {
-      throw new BadRequestException('Name cannot be empty');
-    }
-
-    if (body?.email !== undefined && !email) {
-      throw new BadRequestException('Email cannot be empty');
-    }
-
-    if (name !== undefined && name.length < 2) {
-      throw new BadRequestException('Name must be at least 2 characters');
-    }
-
-    if (email !== undefined && !this.isValidEmail(email)) {
-      throw new BadRequestException('Email must be valid');
-    }
-
-    return this.usersService.update(id, { name, email, role });
+    return this.usersService.update(id, body);
   }
 
   @Delete(':id')

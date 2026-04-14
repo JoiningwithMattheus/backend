@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
+import { ValidationPipe } from '@nestjs/common';
 
 config({ path: resolve(process.cwd(), '../.env') });
 
@@ -10,6 +11,14 @@ async function bootstrap() {
   app.enableCors({
     origin: 'http://localhost:4200',
   });
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
