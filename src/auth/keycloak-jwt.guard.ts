@@ -1,15 +1,27 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { config } from 'dotenv';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
-import { resolve } from 'node:path';
-
-config({ path: resolve(process.cwd(), '../.env') });
-
-const issuer = process.env.KEYCLOAK_ISSUER ?? 'http://localhost:8080/realms/NestJS';
-const jwks = createRemoteJWKSet(new URL(`${issuer}/protocol/openid-connect/certs`));
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class KeycloakJwtGuard implements CanActivate {
+  private readonly issuer: string;
+  private readonly jwks: ReturnType<typeof createRemoteJWKSet>;
+
+  constructor(configService: ConfigService) {
+    this.issuer =
+      configService.get<string>('KEYCLOAK_ISSUER') ??
+      'http://localhost:8080/realms/NestJS';
+
+    this.jwks = createRemoteJWKSet(
+      new URL(`${this.issuer}/protocol/openid-connect/certs`),
+    );
+  }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const header = req.headers?.authorization;
@@ -21,7 +33,10 @@ export class KeycloakJwtGuard implements CanActivate {
     const token = header.slice('Bearer '.length).trim();
 
     try {
-      const { payload } = await jwtVerify(token, jwks, { issuer });
+      const { payload } = await jwtVerify(token, this.jwks, {
+        issuer: this.issuer,
+      });
+
       req.user = payload;
       return true;
     } catch {

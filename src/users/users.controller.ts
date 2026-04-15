@@ -15,8 +15,8 @@ import { KeycloakJwtGuard } from '../auth/keycloak-jwt.guard';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @UseGuards(KeycloakJwtGuard, RolesGuard)
 @Controller('users')
