@@ -17,12 +17,24 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
+@ApiTags('users')
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Missing or invalid Bearer token' })
 @UseGuards(KeycloakJwtGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiOkResponse({ description: 'Returns all users' })
   @Get()
   getAllUsers() {
     return this.usersService.findAll();
@@ -34,6 +46,8 @@ export class UsersController {
   }
 
   @Post()
+  @ApiForbiddenResponse({ description: 'Requires Keycloak admin role' })
+  @ApiBadRequestResponse({ description: 'Invalid user data' })
   @Roles('admin')
   createUser(@Body() body: CreateUserDto) {
     if (
@@ -48,6 +62,8 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiForbiddenResponse({ description: 'Requires Keycloak admin role' })
+  @ApiBadRequestResponse({ description: 'Invalid user data' })
   @Roles('admin')
   updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -65,6 +81,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiForbiddenResponse({ description: 'Requires Keycloak admin role' })
   @Roles('admin')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);

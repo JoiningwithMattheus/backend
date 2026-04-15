@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import { resolve } from 'node:path';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 config({ path: resolve(process.cwd(), '../.env') });
 
@@ -22,6 +23,16 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('NestJS Users API')
+    .setDescription('Users API protected by Keycloak JWT authentication')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, swaggerDocument);
 
   await app.listen(port);
 }
