@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { LoggingInterceptor } from './common/logging.interceptor';
 
 config({ path: resolve(process.cwd(), '../.env') });
 
@@ -20,6 +21,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
