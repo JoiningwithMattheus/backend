@@ -14,11 +14,11 @@ export class KeycloakJwtGuard implements CanActivate {
 
   constructor(configService: ConfigService) {
     this.issuer =
-      configService.get<string>('KEYCLOAK_ISSUER') ??
+      configService.get<string>('AUTH_ISSUER') ??
       'http://localhost:8080/realms/NestJS';
 
     const jwksUri =
-      configService.get<string>('KEYCLOAK_JWKS_URI') ??
+      configService.get<string>('AUTH_JWKS_URI') ??
       `${this.issuer}/protocol/openid-connect/certs`;
 
     this.jwks = createRemoteJWKSet(new URL(jwksUri));
