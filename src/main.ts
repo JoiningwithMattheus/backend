@@ -28,7 +28,7 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestJS Users API')
-    .setDescription('Users API protected by Keycloak JWT authentication')
+    .setDescription('Users API protected by OIDC JWT authentication')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

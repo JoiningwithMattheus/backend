@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { KeycloakJwtGuard } from '../auth/keycloak-jwt.guard';
+import { JwtAuthGuard } from '../auth/keycloak-jwt.guard';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -29,7 +29,7 @@ import {
 @ApiTags('users')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: 'Missing or invalid Bearer token' })
-@UseGuards(KeycloakJwtGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -46,7 +46,7 @@ export class UsersController {
   }
 
   @Post()
-  @ApiForbiddenResponse({ description: 'Requires Keycloak admin role' })
+  @ApiForbiddenResponse({ description: 'Requires Cognito admin role' })
   @ApiBadRequestResponse({ description: 'Invalid user data' })
   @Roles('admin')
   createUser(@Body() body: CreateUserDto) {

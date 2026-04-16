@@ -8,18 +8,18 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class KeycloakJwtGuard implements CanActivate {
+export class JwtAuthGuard implements CanActivate {
   private readonly issuer: string;
   private readonly jwks: ReturnType<typeof createRemoteJWKSet>;
 
   constructor(configService: ConfigService) {
     this.issuer =
       configService.get<string>('AUTH_ISSUER') ??
-      'http://localhost:8080/realms/NestJS';
+      'https://cognito-idp.eu-north-1.amazonaws.com/eu-north-1_906kvnKmh';
 
     const jwksUri =
       configService.get<string>('AUTH_JWKS_URI') ??
-      `${this.issuer}/protocol/openid-connect/certs`;
+      `${this.issuer}/.well-known/jwks.json`;
 
     this.jwks = createRemoteJWKSet(new URL(jwksUri));
   }
