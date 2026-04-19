@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/keycloak-jwt.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -62,7 +62,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @ApiForbiddenResponse({ description: 'Requires Keycloak admin role' })
+  @ApiForbiddenResponse({ description: 'Requires Cognito admin role' })
   @ApiBadRequestResponse({ description: 'Invalid user data' })
   @Roles('admin')
   updateUser(
@@ -81,7 +81,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ApiForbiddenResponse({ description: 'Requires Keycloak admin role' })
+  @ApiForbiddenResponse({ description: 'Requires Cognito admin role' })
   @Roles('admin')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
