@@ -43,7 +43,21 @@ model JournalEntry {
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
+  shares EntryShare[]
+
   @@index([ownerSub, createdAt])
+}
+
+model EntryShare {
+  id           Int      @id @default(autoincrement())
+  entryId      Int
+  recipientSub String
+  createdAt    DateTime @default(now())
+
+  entry        JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, recipientSub])
+  @@index([recipientSub])
 }
 
 enum EntryMood {

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
+import { ShareEntryDto } from './dto/share-entry.dto';
 
 @Injectable()
 export class EntriesService {
@@ -49,6 +50,33 @@ export class EntriesService {
 
     return this.prisma.journalEntry.delete({
       where: { id },
+    });
+  }
+
+  async share(entryId: number, ownerSub: string, dto: ShareEntryDto) {
+    await this.findOne(entryId, ownerSub);
+
+    return this.prisma.entryShare.create({
+      data: {
+        entryId,
+        recipientSub: dto.recipientSub,
+      },
+    });
+  }
+
+  findSharedWithMe(recipientSub: string) {
+    return this.prisma.entryShare.findMany({
+      where: { recipientSub },
+      include: { entry: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async unshare(entryId: number, shareId: number, ownerSub: string) {
+    await this.findOne(entryId, ownerSub);
+
+    return this.prisma.entryShare.delete({
+      where: { id: shareId },
     });
   }
 }
