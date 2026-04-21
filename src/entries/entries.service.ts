@@ -11,6 +11,7 @@ export class EntriesService {
   findAll(ownerSub: string) {
     return this.prisma.journalEntry.findMany({
       where: { ownerSub },
+      include: { shares: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -59,14 +60,14 @@ export class EntriesService {
     return this.prisma.entryShare.create({
       data: {
         entryId,
-        recipientSub: dto.recipientSub,
+        recipientUsername: dto.recipientUsername,
       },
     });
   }
 
-  findSharedWithMe(recipientSub: string) {
+  findSharedWithMe(recipientUsername: string) {
     return this.prisma.entryShare.findMany({
-      where: { recipientSub },
+      where: { recipientUsername },
       include: { entry: true },
       orderBy: { createdAt: 'desc' },
     });

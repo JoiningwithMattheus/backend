@@ -12,10 +12,10 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
+  id    Int     @id @default(autoincrement())
   name  String
   email String?
-  role  Role   @default(USER)
+  role  Role    @default(USER)
 }
 
 enum Role {
@@ -49,15 +49,17 @@ model JournalEntry {
 }
 
 model EntryShare {
-  id           Int      @id @default(autoincrement())
-  entryId      Int
-  recipientSub String
-  createdAt    DateTime @default(now())
+  id             Int      @id @default(autoincrement())
+  entryId        Int
+  recipientUsername String
+  excerptTitle   String?
+  excerptContent String?
+  createdAt      DateTime @default(now())
 
-  entry        JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entry JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
 
-  @@unique([entryId, recipientSub])
-  @@index([recipientSub])
+  @@unique([entryId, recipientUsername])
+  @@index([recipientUsername])
 }
 
 enum EntryMood {
@@ -77,3 +79,11 @@ enum EntryVisibility {
   COMMUNITY
 }
 
+model UserProfile {
+  id             Int          @id @default(autoincrement())
+  cognitoSub     String       @unique
+  username       String       @unique
+  displayName    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}

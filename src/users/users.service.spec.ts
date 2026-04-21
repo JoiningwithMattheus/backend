@@ -40,18 +40,28 @@ describe('UsersService', () => {
 
   it('findOne delegates to prisma', () => {
     service.findOne(123);
-    expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({ where: { id: 123 } });
+    expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 123 },
+    });
   });
 
   it('create delegates to prisma', () => {
-    service.create({ name: 'John', email: 'john@example.com', role: Role.ADMIN });
+    service.create({
+      name: 'John',
+      email: 'john@example.com',
+      role: Role.ADMIN,
+    });
     expect(prismaServiceMock.user.create).toHaveBeenCalledWith({
       data: { name: 'John', email: 'john@example.com', role: Role.ADMIN },
     });
   });
 
   it('update delegates to prisma', () => {
-    service.update(5, { name: 'Jane', email: 'jane@example.com', role: Role.USER });
+    service.update(5, {
+      name: 'Jane',
+      email: 'jane@example.com',
+      role: Role.USER,
+    });
     expect(prismaServiceMock.user.update).toHaveBeenCalledWith({
       where: { id: 5 },
       data: { name: 'Jane', email: 'jane@example.com', role: Role.USER },
@@ -60,6 +70,8 @@ describe('UsersService', () => {
 
   it('remove delegates to prisma', () => {
     service.remove(7);
-    expect(prismaServiceMock.user.delete).toHaveBeenCalledWith({ where: { id: 7 } });
+    expect(prismaServiceMock.user.delete).toHaveBeenCalledWith({
+      where: { id: 7 },
+    });
   });
 });

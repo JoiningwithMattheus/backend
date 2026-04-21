@@ -26,6 +26,7 @@ import { ShareEntryDto } from './dto/share-entry.dto';
 type RequestWithUser = {
   user: {
     sub: string;
+    username: string;
   };
 };
 
@@ -50,7 +51,7 @@ export class EntriesController {
   })
   @Get('shared-with-me')
   findSharedWithMe(@Req() req: RequestWithUser) {
-    return this.entriesService.findSharedWithMe(req.user.sub);
+    return this.entriesService.findSharedWithMe(req.user.username);
   }
 
   @Get(':id')

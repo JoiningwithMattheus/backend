@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { resolve } from 'node:path';
 import { TasksModule } from './tasks/tasks.module';
 import { EntriesModule } from './entries/entries.module';
+import { ProfilesModule } from './profiles/profiles.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EntriesModule } from './entries/entries.module';
     UsersModule,
     TasksModule,
     EntriesModule,
+    ProfilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
